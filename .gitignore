@@ -1,0 +1,37 @@
+# Java build files
+/bin
+/build
+/.gradle
+*.class
+*.jar
+*.war
+*.ear
+
+# IDEs
+*.iml
+.idea/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+
+# for IntelliJ IDEA and some Java tools
+out/
+
+# Ignore Eclipse project files
+.classpath
+.project
+
+# Vim swap files
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
