@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    // i will add libs later
+     implementation 'com.formdev:flatlaf:3.6'
 }
 
 application {

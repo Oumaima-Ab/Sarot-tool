@@ -12,6 +12,7 @@ public class MainView {
     private JPasswordField passwordField;
     private JCheckBox zipSingleFileCheckBox;
     private JCheckBox overwriteOriginalCheckBox;
+    private JProgressBar progressBar;
 
     public JFrame getFrame() {
     return frame;
@@ -80,6 +81,12 @@ public class MainView {
         JButton decryptButton = new JButton("Decrypt");
         decryptButton.addActionListener(this::onDecryptClicked);
 
+        // Progress bar (initially hidden)
+        progressBar = new JProgressBar();
+        progressBar.setIndeterminate(true);
+        progressBar.setVisible(false);
+        panel.add(progressBar);
+
         // Add to panel
         panel.add(folderPanel);
         panel.add(passwordPanel);
@@ -136,5 +143,15 @@ public class MainView {
     }
     public boolean isOverwriteOriginalSelected() {
         return overwriteOriginalCheckBox.isSelected();
+    }
+
+    // Show/hide progress bar methods
+    public void showProgressBar() {
+        progressBar.setVisible(true);
+        frame.repaint();
+    }
+    public void hideProgressBar() {
+        progressBar.setVisible(false);
+        frame.repaint();
     }
 }
