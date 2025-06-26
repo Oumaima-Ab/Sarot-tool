@@ -26,30 +26,49 @@ public class EncryptController {
                 view.showMessage("Please select a valid file or directory.", "Error");
                 return;
             }
-
             if (password == null || password.length() < 4) {
                 view.showMessage("Please enter a password of at least 4 characters.", "Error");
                 return;
             }
 
+            boolean zipUsed = false;
             File fileToEncrypt = file;
-            // If it's a directory, zip it first
-            if (file.isDirectory()) {
-                try {
+
+            try {
+                if (file.isDirectory()) {
+                    // Always zip folders
                     fileToEncrypt = ZipModel.zipFolder(file);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    view.showMessage("Failed to zip the folder before encryption.", "Error");
-                    return;
+                    zipUsed = true;
+                } else if (view.isZipSingleFileSelected()) {
+                    // Optionally zip single files
+                    fileToEncrypt = ZipModel.zipFolder(file);
+                    zipUsed = true;
                 }
-            }
 
-            boolean success = cryptoModel.encrypt(fileToEncrypt, password);
+                boolean success = cryptoModel.encrypt(fileToEncrypt, password);
 
-            if (success) {
-                view.showMessage("Encryption completed successfully!", "Success");
-            } else {
-                view.showMessage("Encryption failed. Please try again.", "Error");
+                // Clean up intermediate zip if used
+                if (zipUsed && fileToEncrypt.exists()) {
+                    fileToEncrypt.delete();
+                }
+
+                // Optionally delete original input
+                if (success && view.isOverwriteOriginalSelected()) {
+                    if (file.isDirectory()) {
+                        deleteDirectoryRecursively(file);
+                    } else {
+                        file.delete();
+                    }
+                }
+
+                if (success) {
+                    view.showMessage("Encryption completed successfully!", "Success");
+                } else {
+                    view.showMessage("Encryption failed. Please try again.", "Error");
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                view.showMessage("An error occurred during encryption.", "Error");
             }
         });
         // Connect the "Decrypt" button logic
@@ -72,5 +91,15 @@ public class EncryptController {
                 view.showMessage("Decryption failed. Please try again.", "Error");
             }
         });
+    }
+
+    // Helper to delete directories recursively
+    private void deleteDirectoryRecursively(File dir) {
+        if (dir.isDirectory()) {
+            for (File child : dir.listFiles()) {
+                deleteDirectoryRecursively(child);
+            }
+        }
+        dir.delete();
     }
 }

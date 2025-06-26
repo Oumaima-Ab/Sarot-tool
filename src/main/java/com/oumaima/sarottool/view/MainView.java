@@ -10,6 +10,8 @@ public class MainView {
     private JFrame frame;
     private JTextField folderPathField;
     private JPasswordField passwordField;
+    private JCheckBox zipSingleFileCheckBox;
+    private JCheckBox overwriteOriginalCheckBox;
 
     public JFrame getFrame() {
     return frame;
@@ -43,7 +45,7 @@ public class MainView {
         frame.setSize(500, 200);
         frame.setLocationRelativeTo(null);
 
-        JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
+        JPanel panel = new JPanel(new GridLayout(6, 1, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         // Folder chooser
@@ -60,6 +62,16 @@ public class MainView {
         passwordPanel.add(new JLabel("Password:"), BorderLayout.WEST);
         passwordPanel.add(passwordField, BorderLayout.CENTER);
 
+        // Zip single file checkbox
+        zipSingleFileCheckBox = new JCheckBox("Zip single file before encryption");
+        JPanel zipPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        zipPanel.add(zipSingleFileCheckBox);
+
+        // Overwrite original checkbox
+        overwriteOriginalCheckBox = new JCheckBox("Overwrite original file/folder after encryption");
+        JPanel overwritePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        overwritePanel.add(overwriteOriginalCheckBox);
+
         // Encrypt button
         JButton encryptButton = new JButton("Encrypt");
         encryptButton.addActionListener(this::onEncryptClicked);
@@ -71,6 +83,8 @@ public class MainView {
         // Add to panel
         panel.add(folderPanel);
         panel.add(passwordPanel);
+        panel.add(zipPanel);
+        panel.add(overwritePanel);
         panel.add(encryptButton);
         panel.add(decryptButton);
 
@@ -114,5 +128,13 @@ public class MainView {
         }
         File file = new File(path.trim());
         return file.exists() ? file : null;
+    }
+
+    // Add getters for controller access:
+    public boolean isZipSingleFileSelected() {
+        return zipSingleFileCheckBox.isSelected();
+    }
+    public boolean isOverwriteOriginalSelected() {
+        return overwriteOriginalCheckBox.isSelected();
     }
 }

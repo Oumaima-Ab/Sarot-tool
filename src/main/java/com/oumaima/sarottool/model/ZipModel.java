@@ -12,24 +12,29 @@ import java.util.zip.*;
 public class ZipModel {
 
     // Compresses a directory into a .zip file.
-    public static File zipFolder(File sourceDir) throws IOException {
-        File zipFile = new File(sourceDir.getParent(), sourceDir.getName() + ".zip");
-
+    public static File zipFolder(File source) throws IOException {
+        File zipFile = new File(source.getParent(), source.getName() + ".zip");
         try (FileOutputStream fos = new FileOutputStream(zipFile);
              ZipOutputStream zos = new ZipOutputStream(fos)) {
-            Path sourcePath = sourceDir.toPath();
-            Files.walk(sourcePath).filter(path -> !Files.isDirectory(path)).forEach(path -> {
-                ZipEntry zipEntry = new ZipEntry(sourcePath.relativize(path).toString());
-                try {
-                    zos.putNextEntry(zipEntry);
-                    Files.copy(path, zos);
-                    zos.closeEntry();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
+            Path sourcePath = source.toPath();
+            if (source.isDirectory()) {
+                Files.walk(sourcePath).filter(path -> !Files.isDirectory(path)).forEach(path -> {
+                    ZipEntry zipEntry = new ZipEntry(sourcePath.relativize(path).toString());
+                    try {
+                        zos.putNextEntry(zipEntry);
+                        Files.copy(path, zos);
+                        zos.closeEntry();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+            } else {
+                ZipEntry zipEntry = new ZipEntry(source.getName());
+                zos.putNextEntry(zipEntry);
+                Files.copy(sourcePath, zos);
+                zos.closeEntry();
+            }
         }
-
         return zipFile;
     }
 
