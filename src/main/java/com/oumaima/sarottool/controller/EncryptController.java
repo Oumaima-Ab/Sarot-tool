@@ -1,6 +1,7 @@
 package com.oumaima.sarottool.controller;
 
 import com.oumaima.sarottool.model.CryptoModel;
+import com.oumaima.sarottool.model.ZipModel;
 import com.oumaima.sarottool.view.MainView;
 
 import java.io.File;
@@ -31,7 +32,19 @@ public class EncryptController {
                 return;
             }
 
-             boolean success = cryptoModel.encrypt(file, password);
+            File fileToEncrypt = file;
+            // If it's a directory, zip it first
+            if (file.isDirectory()) {
+                try {
+                    fileToEncrypt = ZipModel.zipFolder(file);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    view.showMessage("Failed to zip the folder before encryption.", "Error");
+                    return;
+                }
+            }
+
+            boolean success = cryptoModel.encrypt(fileToEncrypt, password);
 
             if (success) {
                 view.showMessage("Encryption completed successfully!", "Success");

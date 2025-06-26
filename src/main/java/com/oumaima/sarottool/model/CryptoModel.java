@@ -14,6 +14,28 @@ public class CryptoModel {
     private static final int IV_LENGTH = 16;
     private static final int ITERATIONS = 65536;
 
+    // Helper: Get encrypted filename (e.g., file.pdf -> file_enc.pdf)
+    private String getEncryptedFileName(File inputFile) {
+        String name = inputFile.getName();
+        int dot = name.lastIndexOf('.');
+        return (dot > 0)
+            ? name.substring(0, dot) + "_enc" + name.substring(dot)
+            : name + "_enc";
+    }
+
+    // Helper: Get decrypted filename (e.g., file_enc.pdf -> file_dec.pdf)
+    private String getDecryptedFileName(File inputFile) {
+        String name = inputFile.getName();
+        int dot = name.lastIndexOf('.');
+        if (dot > 0 && name.substring(0, dot).endsWith("_enc")) {
+            return name.substring(0, dot - 4) + "_dec" + name.substring(dot);
+        } else if (name.endsWith("_enc")) {
+            return name.substring(0, name.length() - 4) + "_dec";
+        } else {
+            return name + "_dec";
+        }
+    }
+
     public boolean encrypt(File inputFile, String password) {
         try {
             // Read file content
@@ -34,7 +56,7 @@ public class CryptoModel {
             byte[] encrypted = cipher.doFinal(fileBytes);
 
             // Write to output file: [salt][iv][ciphertext]
-            File outputFile = new File(inputFile.getParent(), inputFile.getName() + ".enc");
+            File outputFile = new File(inputFile.getParent(), getEncryptedFileName(inputFile));
             try (FileOutputStream fos = new FileOutputStream(outputFile)) {
                 fos.write(salt);
                 fos.write(iv);
@@ -71,8 +93,8 @@ public class CryptoModel {
             // Decrypt
             byte[] decrypted = cipher.doFinal(ciphertext);
 
-            // Write to output file: [original filename].dec
-            File outputFile = new File(inputFile.getParent(), inputFile.getName().replace(".enc", ".dec"));
+            // Write to output file: [original filename]_dec.ext
+            File outputFile = new File(inputFile.getParent(), getDecryptedFileName(inputFile));
             try (FileOutputStream fos = new FileOutputStream(outputFile)) {
                 fos.write(decrypted);
             }
