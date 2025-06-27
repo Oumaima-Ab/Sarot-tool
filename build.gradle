@@ -13,6 +13,7 @@ repositories {
 
 dependencies {
      implementation 'com.formdev:flatlaf:3.6'
+    implementation 'org.passay:passay:1.6.0'
 }
 
 application {

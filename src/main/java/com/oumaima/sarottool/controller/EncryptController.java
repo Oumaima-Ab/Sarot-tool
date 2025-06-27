@@ -3,8 +3,10 @@ package com.oumaima.sarottool.controller;
 import com.oumaima.sarottool.model.CryptoModel;
 import com.oumaima.sarottool.model.ZipModel;
 import com.oumaima.sarottool.view.MainView;
+import org.passay.*;
 
 import java.io.File;
+import java.util.Arrays;
 
 
 public class EncryptController {
@@ -15,24 +17,24 @@ public class EncryptController {
     public EncryptController(MainView view, CryptoModel cryptoModel) {
         this.view = view;
         this.cryptoModel = cryptoModel;
-
         initListeners();
     }
 
     private void initListeners() {
-        view.setEncryptAction((File file, String password) -> {
+        view.setEncryptAction((file, password) -> {
+            // Input validation
+            if (file == null) {
+                view.showError("Please select a file or folder.");
+                return;
+            }
+            if (!isPasswordStrong(password)) {
+              return;
+           }
             new javax.swing.SwingWorker<Boolean, Void>() {
                 @Override
                 protected Boolean doInBackground() {
-                    view.showProgressBar();
-                    if (file == null || !file.exists()) {
-                        view.showMessage("Please select a valid file or directory.", "Error");
-                        return false;
-                    }
-                    if (password == null || password.length() < 4) {
-                        view.showMessage("Please enter a password of at least 4 characters.", "Error");
-                        return false;
-                    }
+                    view.showProgressBar("Encrypting...");
+                    view.setStatus("Encrypting " + file.getName() + "...");
                     boolean zipUsed = false;
                     File fileToEncrypt = file;
                     try {
@@ -58,48 +60,53 @@ public class EncryptController {
                 @Override
                 protected void done() {
                     view.hideProgressBar();
+                    view.setStatus(" ");
                     try {
                         boolean success = get();
                         if (success) {
-                            view.showMessage("Encryption completed successfully!", "Success");
+                            view.showInfo("Encryption completed successfully!");
                         } else {
-                            view.showMessage("Encryption failed. Please try again.", "Error");
+                            view.showError("Encryption failed. Please try again.");
                         }
                     } catch (Exception ex) {
-                        view.showMessage("An error occurred during encryption.", "Error");
+                        view.showError("An error occurred during encryption.");
                     }
                 }
             }.execute();
         });
 
-        view.setDecryptAction((File file, String password) -> {
+        view.setDecryptAction((file, password) -> {
+            // Input validation
+            if (file == null) {
+                view.showError("Please select a file or folder.");
+                return;
+            }
+            if (password == null ) {
+                view.showError("Please enter a password .");
+                return;
+            }
+
             new javax.swing.SwingWorker<Boolean, Void>() {
                 @Override
                 protected Boolean doInBackground() {
-                    view.showProgressBar();
-                    if (file == null || !file.exists()) {
-                        view.showMessage("Please select a valid file or directory.", "Error");
-                        return false;
-                    }
-                    if (password == null || password.length() < 4) {
-                        view.showMessage("Please enter a password of at least 4 characters.", "Error");
-                        return false;
-                    }
+                    view.showProgressBar("Decrypting...");
+                    view.setStatus("Decrypting " + file.getName() + "...");
                     boolean success = cryptoModel.decrypt(file, password);
                     return success;
                 }
                 @Override
                 protected void done() {
                     view.hideProgressBar();
+                    view.setStatus(" ");
                     try {
                         boolean success = get();
                         if (success) {
-                            view.showMessage("Decryption completed successfully!", "Success");
+                            view.showInfo("Decryption completed successfully!");
                         } else {
-                            view.showMessage("Decryption failed. Please try again.", "Error");
+                            view.showError("Decryption failed. Please try again.");
                         }
                     } catch (Exception ex) {
-                        view.showMessage("An error occurred during decryption.", "Error");
+                        view.showError("An error occurred during decryption.");
                     }
                 }
             }.execute();
@@ -114,5 +121,24 @@ public class EncryptController {
             }
         }
         dir.delete();
+    }
+
+    private boolean isPasswordStrong(String password) {
+        PasswordValidator validator = new PasswordValidator(Arrays.asList(
+            new LengthRule(8, 32),
+            new CharacterRule(EnglishCharacterData.UpperCase, 1),
+            new CharacterRule(EnglishCharacterData.LowerCase, 1),
+            new CharacterRule(EnglishCharacterData.Digit, 1),
+            new CharacterRule(EnglishCharacterData.Special, 1),
+            new WhitespaceRule() // no spaces
+        ));
+        RuleResult result = validator.validate(new PasswordData(password));
+        if (result.isValid()) {
+            return true;
+        } else {
+            String message = String.join("\n", validator.getMessages(result));
+            view.showError("Password is too weak:\n" + message);
+            return false;
+        }
     }
 }
