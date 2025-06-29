@@ -2,6 +2,10 @@ package com.oumaima.sarottool.view;
 
 import javax.swing.*;
 import javax.swing.border.*;
+
+import com.formdev.flatlaf.FlatIntelliJLaf;
+// or FlatDarkLaf, FlatIntelliJLaf, FlatDarculaLaf,FlatLightLaf etc.
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -78,9 +82,9 @@ public class MainView {
     }
 
     public void createAndShowGUI() {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ignored) {}
+        try {FlatIntelliJLaf.setup(); } // or UIManager.setLookAndFeel(new FlatLightLaf());
+            catch (Exception ex) {System.err.println("Failed to initialize FlatLaf");}
+            
         initComponents();
         layoutComponents();
         frame.setVisible(true);

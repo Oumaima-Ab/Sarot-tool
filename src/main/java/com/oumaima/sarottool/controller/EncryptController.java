@@ -34,7 +34,7 @@ public class EncryptController {
                 @Override
                 protected Boolean doInBackground() {
                     view.showProgressBar("Encrypting...");
-                    view.setStatus("Encrypting " + file.getName() + "...");
+                    view.setStatus("Encrypting  " + file.getName() + "...");
                     boolean zipUsed = false;
                     File fileToEncrypt = file;
                     try {

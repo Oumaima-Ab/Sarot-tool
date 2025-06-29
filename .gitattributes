@@ -4,8 +4,10 @@
 # Linux/macOS Gradle wrapper script should always use LF
 /gradlew text eol=lf
 
-# Gradle wrapper JAR and properties should always use LF
-/gradle/wrapper/* text eol=lf
+# Ensure Gradle wrapper properties file uses LF and jar is treated as binary
+/gradle/wrapper/gradle-wrapper.properties text eol=lf
+/gradle/wrapper/gradle-wrapper.jar binary
+
 
 # Windows batch files should always use CRLF
 *.bat text eol=crlf
