@@ -6,8 +6,9 @@ import com.oumaima.sarottool.view.MainView;
 import org.passay.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
-
+import java.util.concurrent.ExecutionException;
 
 public class EncryptController {
 
@@ -28,13 +29,13 @@ public class EncryptController {
                 return;
             }
             if (!isPasswordStrong(password)) {
-              return;
-           }
+                return;
+            }
             new javax.swing.SwingWorker<Boolean, Void>() {
                 @Override
                 protected Boolean doInBackground() {
                     view.showProgressBar("Encrypting...");
-                    view.setStatus("Encrypting  " + file.getName() + "...");
+                    view.setStatus("Encrypting " + file.getName() + "...");
                     boolean zipUsed = false;
                     File fileToEncrypt = file;
                     try {
@@ -52,9 +53,11 @@ public class EncryptController {
                             else file.delete();
                         }
                         return success;
+                    } catch (IOException ioEx) {
+                        // ZipModel error
+                        throw new RuntimeException("Failed to zip file/folder: " + ioEx.getMessage(), ioEx);
                     } catch (Exception ex) {
-                        ex.printStackTrace();
-                        return false;
+                        throw new RuntimeException("Encryption error: " + ex.getMessage(), ex);
                     }
                 }
                 @Override
@@ -68,8 +71,18 @@ public class EncryptController {
                         } else {
                             view.showError("Encryption failed. Please try again.");
                         }
+                    } catch (ExecutionException ex) {
+                        Throwable cause = ex.getCause();
+                        if (cause.getMessage() != null && cause.getMessage().startsWith("Failed to zip")) {
+                            view.showError("Encryption failed: " + cause.getMessage());
+                        } else {
+                            view.showError("An error occurred during encryption: " + cause.getMessage());
+                        }
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                        view.showError("Encryption was interrupted.");
                     } catch (Exception ex) {
-                        view.showError("An error occurred during encryption.");
+                        view.showError("An unexpected error occurred during encryption.");
                     }
                 }
             }.execute();
@@ -81,8 +94,8 @@ public class EncryptController {
                 view.showError("Please select a file or folder.");
                 return;
             }
-            if (password == null ) {
-                view.showError("Please enter a password .");
+            if (password == null) {
+                view.showError("Please enter a password.");
                 return;
             }
 
@@ -91,9 +104,16 @@ public class EncryptController {
                 protected Boolean doInBackground() {
                     view.showProgressBar("Decrypting...");
                     view.setStatus("Decrypting " + file.getName() + "...");
-                    boolean success = cryptoModel.decrypt(file, password);
-                    return success;
+                    try {
+                        return cryptoModel.decrypt(file, password);
+                    } catch (SecurityException se) {
+                        // Pass info to done()
+                        throw se;
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
+
                 @Override
                 protected void done() {
                     view.hideProgressBar();
@@ -105,8 +125,18 @@ public class EncryptController {
                         } else {
                             view.showError("Decryption failed. Please try again.");
                         }
+                    } catch (ExecutionException ex) {
+                        Throwable cause = ex.getCause();
+                        if (cause instanceof SecurityException) {
+                            view.showError("Decryption failed: The file may have been modified, corrupted, or the password is incorrect.");
+                        } else {
+                            view.showError("An error occurred during decryption: " + cause.getMessage());
+                        }
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                        view.showError("Decryption was interrupted.");
                     } catch (Exception ex) {
-                        view.showError("An error occurred during decryption.");
+                        view.showError("An unexpected error occurred during decryption.");
                     }
                 }
             }.execute();

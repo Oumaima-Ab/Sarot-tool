@@ -18,16 +18,22 @@ public class ZipModel {
              ZipOutputStream zos = new ZipOutputStream(fos)) {
             Path sourcePath = source.toPath();
             if (source.isDirectory()) {
-                Files.walk(sourcePath).filter(path -> !Files.isDirectory(path)).forEach(path -> {
-                    ZipEntry zipEntry = new ZipEntry(sourcePath.relativize(path).toString());
-                    try {
-                        zos.putNextEntry(zipEntry);
-                        Files.copy(path, zos);
-                        zos.closeEntry();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
+                try {
+                    Files.walk(sourcePath)
+                        .filter(path -> !Files.isDirectory(path))
+                        .forEach(path -> {
+                            ZipEntry zipEntry = new ZipEntry(sourcePath.relativize(path).toString());
+                            try {
+                                zos.putNextEntry(zipEntry);
+                                Files.copy(path, zos);
+                                zos.closeEntry();
+                            } catch (IOException e) {
+                                throw new UncheckedIOException(e); // propagate error
+                            }
+                        });
+                } catch (UncheckedIOException e) {
+                    throw e.getCause(); // rethrow as IOException
+                }
             } else {
                 ZipEntry zipEntry = new ZipEntry(source.getName());
                 zos.putNextEntry(zipEntry);
