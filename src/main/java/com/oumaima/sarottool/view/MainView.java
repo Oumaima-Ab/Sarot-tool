@@ -3,7 +3,8 @@ package com.oumaima.sarottool.view;
 import javax.swing.*;
 import javax.swing.border.*;
 
-import com.formdev.flatlaf.FlatIntelliJLaf;
+
+
 // or FlatDarkLaf, FlatIntelliJLaf, FlatDarculaLaf,FlatLightLaf etc.
 
 import java.awt.*;
@@ -13,6 +14,8 @@ import java.io.File;
 public class MainView {
 
     private JFrame frame;
+    private ImageIcon logo;
+
     private JTextField folderPathField;
     private JButton browseButton;
     private JPasswordField passwordField;
@@ -81,10 +84,7 @@ public class MainView {
         statusLabel.setText(status);
     }
 
-    public void createAndShowGUI() {
-        try {FlatIntelliJLaf.setup(); } // or UIManager.setLookAndFeel(new FlatLightLaf());
-            catch (Exception ex) {System.err.println("Failed to initialize FlatLaf");}
-            
+    public void createAndShowGUI() { 
         initComponents();
         layoutComponents();
         frame.setVisible(true);
@@ -92,6 +92,8 @@ public class MainView {
 
     private void initComponents() {
         frame = new JFrame("Sarot Tool - File Encryption");
+        logo = new ImageIcon(getClass().getResource("/icons/logo.png"));
+        frame.setIconImage(logo.getImage());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setMinimumSize(new Dimension(540, 340));
         frame.setPreferredSize(new Dimension(600, 360));
