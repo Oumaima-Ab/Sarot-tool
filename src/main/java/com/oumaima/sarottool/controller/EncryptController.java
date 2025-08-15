@@ -91,11 +91,11 @@ public class EncryptController {
         view.setDecryptAction((file, password) -> {
             // Input validation
             if (file == null) {
-                view.showError("Please select a file or folder.");
+                view.showError("Please select an encrypted file or folder.");
                 return;
             }
             if (password == null) {
-                view.showError("Please enter a password.");
+                view.showError("Please enter your password.");
                 return;
             }
 
@@ -104,14 +104,25 @@ public class EncryptController {
                 protected Boolean doInBackground() {
                     view.showProgressBar("Decrypting...");
                     view.setStatus("Decrypting " + file.getName() + "...");
+                    boolean success = false;
                     try {
-                        return cryptoModel.decrypt(file, password);
+                        success = cryptoModel.decrypt(file, password);
                     } catch (SecurityException se) {
                         // Pass info to done()
                         throw se;
                     } catch (Exception ex) {
-                        throw new RuntimeException(ex);
+                        throw new RuntimeException("Decryption error: " + ex.getMessage(), ex);
                     }
+                    // Try to delete original file/folder if requested
+                    if (success && view.isOverwriteOriginalSelected()) {
+                        try {
+                            if (file.isDirectory()) deleteDirectoryRecursively(file);
+                            else file.delete();
+                        } catch (Exception ex) {
+                            throw new RuntimeException("Decryption succeeded, but failed to delete original: " + ex.getMessage(), ex);
+                        }
+                    }
+                    return success;
                 }
 
                 @Override
@@ -129,8 +140,12 @@ public class EncryptController {
                         Throwable cause = ex.getCause();
                         if (cause instanceof SecurityException) {
                             view.showError("Decryption failed: The file may have been modified, corrupted, or the password is incorrect.");
-                        } else {
+                        } else if (cause.getMessage() != null && cause.getMessage().startsWith("Decryption succeeded, but failed to delete original")) {
+                            view.showError(cause.getMessage());
+                        } else if (cause.getMessage() != null && cause.getMessage().startsWith("Decryption error:")) {
                             view.showError("An error occurred during decryption: " + cause.getMessage());
+                        } else {
+                            view.showError("An unexpected error occurred during decryption.");
                         }
                     } catch (InterruptedException ex) {
                         Thread.currentThread().interrupt();

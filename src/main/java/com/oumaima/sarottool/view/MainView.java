@@ -115,8 +115,8 @@ public class MainView {
         zipSingleFileCheckBox = new JCheckBox("Zip single file before encryption");
         zipSingleFileCheckBox.setToolTipText("If checked, single files will be zipped before encryption. Folders are always zipped.");
 
-        overwriteOriginalCheckBox = new JCheckBox("Overwrite original file/folder after encryption");
-        overwriteOriginalCheckBox.setToolTipText("If checked, the original file or folder will be deleted after encryption.");
+        overwriteOriginalCheckBox = new JCheckBox("Overwrite original file/folder after encryption/decryption");
+        overwriteOriginalCheckBox.setToolTipText("If checked, the original file or folder will be deleted after encryption/decryption.");
 
         encryptButton = new JButton("Encrypt");
         encryptButton.setToolTipText("Encrypt the selected file or folder");
