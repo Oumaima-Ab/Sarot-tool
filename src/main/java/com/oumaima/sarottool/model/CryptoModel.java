@@ -22,22 +22,23 @@ public class CryptoModel {
     private String getEncryptedFileName(File inputFile) {
         String name = inputFile.getName();
         int dot = name.lastIndexOf('.');
-        return (dot > 0)
-            ? name.substring(0, dot) + "_enc" + name.substring(dot)
-            : name + "_enc";
+        String base = (dot > 0) ? name.substring(0, dot) : name;
+        String ext = (dot > 0) ? name.substring(dot) : "";
+        if (base.endsWith("_enc")) return base + ext; // already encrypted
+        return base + "_enc" + ext;
     }
 
     // Helper: Get decrypted filename (e.g., file_enc.pdf -> file_dec.pdf)
     private String getDecryptedFileName(File inputFile) {
         String name = inputFile.getName();
         int dot = name.lastIndexOf('.');
-        if (dot > 0 && name.substring(0, dot).endsWith("_enc")) {
-            return name.substring(0, dot - 4) + "_dec" + name.substring(dot);
-        } else if (name.endsWith("_enc")) {
-            return name.substring(0, name.length() - 4) + "_dec";
-        } else {
-            return name + "_dec";
+        String base = (dot > 0) ? name.substring(0, dot) : name;
+        String ext = (dot > 0) ? name.substring(dot) : "";
+        if (base.endsWith("_enc")) {
+            base = base.substring(0, base.length() - 4); // remove "_enc"
         }
+         // Option 1: restore original name
+        return base + ext;
     }
 
     public boolean encrypt(File inputFile, String password) {
