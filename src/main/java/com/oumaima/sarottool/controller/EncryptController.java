@@ -39,13 +39,19 @@ public class EncryptController {
                     boolean zipUsed = false;
                     File fileToEncrypt = file;
                     try {
-                        if (file.isDirectory()) {
-                            fileToEncrypt = ZipModel.zipFolder(file);
-                            zipUsed = true;
-                        } else if (view.isZipSingleFileSelected()) {
-                            fileToEncrypt = ZipModel.zipFolder(file);
-                            zipUsed = true;
+                        try {
+                            if (file.isDirectory()) {
+                                fileToEncrypt = ZipModel.zipFolder(file);
+                                zipUsed = true;
+                            } else if (view.isZipSingleFileSelected()) {
+                                fileToEncrypt = ZipModel.zipFolder(file);
+                                zipUsed = true;
+                            }
+                        } catch (IOException ioEx) {
+                            // ZipModel error
+                            throw new RuntimeException("Failed to zip file/folder: " + ioEx.getMessage(), ioEx);
                         }
+
                         boolean success = cryptoModel.encrypt(fileToEncrypt, password);
                         if (zipUsed && fileToEncrypt.exists()) fileToEncrypt.delete();
                         if (success && view.isOverwriteOriginalSelected()) {
@@ -53,9 +59,6 @@ public class EncryptController {
                             else file.delete();
                         }
                         return success;
-                    } catch (IOException ioEx) {
-                        // ZipModel error
-                        throw new RuntimeException("Failed to zip file/folder: " + ioEx.getMessage(), ioEx);
                     } catch (Exception ex) {
                         throw new RuntimeException("Encryption error: " + ex.getMessage(), ex);
                     }
@@ -139,7 +142,7 @@ public class EncryptController {
                     } catch (ExecutionException ex) {
                         Throwable cause = ex.getCause();
                         if (cause instanceof SecurityException) {
-                            view.showError("Decryption failed: The file may have been modified, corrupted, or the password is incorrect.");
+                            view.showError(cause.getMessage());
                         } else if (cause.getMessage() != null && cause.getMessage().startsWith("Decryption succeeded, but failed to delete original")) {
                             view.showError(cause.getMessage());
                         } else if (cause.getMessage() != null && cause.getMessage().startsWith("Decryption error:")) {

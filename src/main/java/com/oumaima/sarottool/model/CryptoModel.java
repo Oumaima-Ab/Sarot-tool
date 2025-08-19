@@ -110,7 +110,12 @@ public class CryptoModel {
             System.arraycopy(ciphertext, 0, ivAndCiphertext, IV_LENGTH, ciphertext.length);
 
             if (!HmacUtils.verifyHmacSHA256(ivAndCiphertext, hmac, hmacKeyBytes)) {
-                throw new SecurityException("HMAC authentication failed! File may be corrupted or password is incorrect.");
+                throw new SecurityException(
+                    "Authentication failed! Possible reasons:\n" +
+                    "- The file was not encrypted by this tool\n" +
+                    "- The file is corrupted or has been modified\n" +
+                    "- The password is incorrect"
+                );
             }
 
             SecretKey aesKey = new SecretKeySpec(aesKeyBytes, "AES");
@@ -123,6 +128,8 @@ public class CryptoModel {
                 fos.write(decrypted);
             }
             return true;
+        } catch (SecurityException se) {
+            throw se; // propagate to controller
         } catch (Exception e) {
             e.printStackTrace();
             return false;
