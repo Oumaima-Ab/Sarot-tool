@@ -1,10 +1,11 @@
 plugins {
     id 'java'
     id 'application'
+    id 'org.panteleyev.jpackageplugin' version '1.6.0'
 }
 
 group = 'com.oumaima'
-version = '1.0'
+version = '1.0.0'
 
 repositories {
     mavenCentral()
@@ -25,3 +26,31 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
+jpackage {
+    appName = "SarotTool"
+    appVersion = "1.0.0"
+    vendor = "Oumaima Aboukhayyou"
+    mainJar = "Sarot-tool-all-1.0.0.jar"
+    input = "build/libs"
+    type = "exe"
+    icon = "src/main/resources/icons/logo.ico"
+    winMenu = true
+    winShortcut = true
+    winDirChooser = true
+    copyright = "Copyright © 2025 Oumaima Aboukhayyou"
+    description = "SarotTool: Secure file/folder encryption and decryption utility."
+    winUpgradeUuid = "e401dee9-525c-469e-a16e-c24481008252"
+}
+
+task fatJar(type: Jar) {
+    archiveBaseName = 'Sarot-tool-all'
+    archiveVersion = '1.0.0'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes 'Main-Class': application.mainClass
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
