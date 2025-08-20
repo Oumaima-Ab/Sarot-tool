@@ -4,9 +4,9 @@
   <img src="docs/logo.png" alt="SarotTool Logo" width="180"/>
 </p>
 
-**SarotTool** is a modern, user-friendly desktop application for secure file and folder encryption and decryption. It uses strong AES-256 encryption, HMAC authentication, and supports zipping folders/files for convenient secure storage and sharing.
+**SarotTool** is a modern, user-friendly desktop application for secure file/folder encryption and decryption. It uses strong AES-256 encryption, HMAC authentication, and supports zipping folders/files for convenient secure storage and sharing.
 
-![SarotTool Screenshot](docs/screenshot.png)
+![SarotTool Screenshot](docs/Screenshot.png)
 
 ---
 
